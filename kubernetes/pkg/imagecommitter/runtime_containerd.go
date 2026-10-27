@@ -24,8 +24,8 @@ import (
 	"syscall"
 	"time"
 
-	containerd "github.com/containerd/containerd"
-	"github.com/containerd/containerd/cio"
+	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/containerd/containerd/v2/pkg/cio"
 	"github.com/containerd/errdefs"
 )
 

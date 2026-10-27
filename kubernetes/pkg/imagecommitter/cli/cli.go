@@ -24,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	containerd "github.com/containerd/containerd"
+	containerd "github.com/containerd/containerd/v2/client"
 
 	"github.com/alibaba/OpenSandbox/sandbox-k8s/pkg/imagecommitter"
 )
