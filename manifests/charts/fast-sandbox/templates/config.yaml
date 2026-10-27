@@ -41,7 +41,14 @@ data:
   podSpec.yaml: |
     {{- . | nindent 4 }}
 {{- end }}
-{{- if .Values.routeKeys.create }}
+{{- if and .Values.routeKeys.create (not .Values.routeKeys.existingSecret) }}
+{{- $keyHelp := "set routeKeys.existingSecret, or routeKeys.privateKey and routeKeys.publicKey (see the chart README for how to generate them)" }}
+{{- if not (and .Values.routeKeys.privateKey .Values.routeKeys.publicKey) }}
+{{- fail (printf "fast-sandbox: no route keys configured; %s" $keyHelp) }}
+{{- end }}
+{{- if or (eq .Values.routeKeys.privateKey "nWGxne/9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A=") (eq .Values.routeKeys.publicKey "11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=") }}
+{{- fail (printf "fast-sandbox: routeKeys uses the published RFC 8032 test keypair, which is not allowed; %s" $keyHelp) }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
@@ -51,9 +58,6 @@ metadata:
   labels:
     {{- include "fast-sandbox.labels" . | nindent 4 }}
     app.kubernetes.io/component: config
-    {{- if .Values.routeKeys.developmentOnly }}
-    fast-sandbox.io/development-only: "true"
-    {{- end }}
 type: Opaque
 stringData:
   private-key: {{ .Values.routeKeys.privateKey | quote }}

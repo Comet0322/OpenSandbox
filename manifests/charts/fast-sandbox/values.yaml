@@ -106,21 +106,22 @@ artifactStore:
 # are HMAC-SHA256, signed by the lifecycle server ([ingress.secure_access],
 # server.gateway.* in charts/server) and verified by the ingress gateway
 # (--secure-access-keys, gateway.secureAccess in charts/ingress-gateway).
-# Development-only RFC 8032 test keys by default; production must provision
-# real keys via routeKeys.existingSecret or explicit values.
+# No default keys ship with the chart: install fails until routeKeys.existingSecret
+# or routeKeys.privateKey/publicKey is set. The published RFC 8032 test keypair
+# is rejected.
 routeKeys:
   # -- Specifies whether the fast-sandbox-route-keys Secret is created here
+  # from privateKey/publicKey (ignored when existingSecret is set)
   create: true
   # -- Use an existing Secret instead of creating one (its keys must be
   # private-key / public-key)
   existingSecret: ""
-  # -- Ed25519 private key (base64) used by the controller's route signer
-  privateKey: nWGxne/9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A=
-  # -- Ed25519 public key (base64) used by the controller's route verifier
-  publicKey: 11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=
-  # -- Mark the Secret with fast-sandbox.io/development-only (set false when
-  # provisioning real keys via privateKey/publicKey)
-  developmentOnly: true
+  # -- Ed25519 private key (base64 of the 32-byte seed) used by the controller's
+  # route signer; required when the chart creates the Secret
+  privateKey: ""
+  # -- Ed25519 public key (base64 of the 32-byte key) used by the controller's
+  # route verifier; required when the chart creates the Secret
+  publicKey: ""
 
 # Runtime environment definitions shared by the controller and the janitor
 # (rendered into the fast-sandbox-runtime-environments ConfigMap). The

@@ -35,16 +35,32 @@ boxlite, containerd-based runtimes and the upstream central sandbox-proxy are ou
 
 ## Installing the Chart
 
+The chart ships no route keys and refuses to render without them (the published RFC 8032 test keypair is also rejected). Generate an Ed25519 keypair and store it in a Secret:
+
 ```bash
-helm install fast-sandbox manifests/charts/fast-sandbox
+openssl genpkey -algorithm ed25519 -outform DER -out route-key.der
+kubectl -n opensandbox-system create secret generic fast-sandbox-route-keys \
+  --from-literal=private-key="$(tail -c 32 route-key.der | base64)" \
+  --from-literal=public-key="$(openssl pkey -inform DER -in route-key.der -pubout -outform DER | tail -c 32 | base64)"
+rm route-key.der
+```
+
+Then install with `routeKeys.existingSecret` pointing at it:
+
+```bash
+helm install fast-sandbox manifests/charts/fast-sandbox \
+  --set routeKeys.existingSecret=fast-sandbox-route-keys
 ```
 
 Or as part of the umbrella chart:
 
 ```bash
 helm install opensandbox manifests/charts/opensandbox \
-  --set fast-sandbox.enabled=true
+  --set fast-sandbox.enabled=true \
+  --set fast-sandbox.routeKeys.existingSecret=fast-sandbox-route-keys
 ```
+
+`routeKeys.privateKey` / `routeKeys.publicKey` (base64 of the 32-byte seed and public key) also work, but put the private key in Helm values and release history; prefer `existingSecret`.
 
 ## Parameters
 
@@ -73,11 +89,10 @@ The following table lists the configurable parameters of the chart and their def
 | janitor.scanInterval | string | `"2m"` | Orphan scan interval |
 | nameOverride | string | `""` | Override the name of the chart |
 | resourceNamespace | string | `"opensandbox-dataplane"` | Namespace for fast-sandbox resource objects (SandboxPools, Templates, Sandboxes and the fastlet/builder Pods they spawn). Must match base.fastSandbox.namespaces.resources. |
-| routeKeys.create | bool | `true` | Specifies whether the fast-sandbox-route-keys Secret is created here |
-| routeKeys.developmentOnly | bool | `true` | Mark the Secret with fast-sandbox.io/development-only (set false when provisioning real keys via privateKey/publicKey) |
+| routeKeys.create | bool | `true` | Specifies whether the fast-sandbox-route-keys Secret is created here from privateKey/publicKey (ignored when existingSecret is set) |
 | routeKeys.existingSecret | string | `""` | Use an existing Secret instead of creating one (its keys must be private-key / public-key) |
-| routeKeys.privateKey | string | `"nWGxne/9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A="` | Ed25519 private key (base64) used by the controller's route signer |
-| routeKeys.publicKey | string | `"11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo="` | Ed25519 public key (base64) used by the controller's route verifier |
+| routeKeys.privateKey | string | `""` | Ed25519 private key (base64 of the 32-byte seed) used by the controller's route signer; required when the chart creates the Secret |
+| routeKeys.publicKey | string | `""` | Ed25519 public key (base64 of the 32-byte key) used by the controller's route verifier; required when the chart creates the Secret |
 | runtime.config | string | `""` | Agent config (agent.yaml). Empty = the chart default (upstream config/dev/agent-config.yaml with the dart discover URL pointing at this chart's namespace). socket/stateRoot/registryConfig/p2p are startup-only; the nodeReadiness section (fcVersion, interval, minFree, minMemory) hot-reloads on every readiness pass. |
 | runtime.dartPeerPort | int | `9000` | DART P2P peer listen port (also the headless dart Service port) |
 | runtime.enabled | bool | `true` | Whether the firecracker-runtime DaemonSet, its RBAC, the agent config ConfigMap and the dart headless Service are installed |
@@ -103,7 +118,7 @@ The following table lists the configurable parameters of the chart and their def
 
 There are two distinct key systems in a fast-sandbox-on-OpenSandbox deployment; do not mix them:
 
-1. **fast-sandbox controller route keys (Ed25519)** — the `fast-sandbox-route-keys` Secret this chart creates (consumed by the controller as `FAST_SANDBOX_ROUTE_SIGNING_PRIVATE_KEY` / `FAST_SANDBOX_ROUTE_VERIFY_PUBLIC_KEY`). By default it holds the published development-only test keys (labeled `fast-sandbox.io/development-only: "true"`). For production, either provision the Secret yourself and set `routeKeys.existingSecret`, or set `routeKeys.privateKey` / `routeKeys.publicKey` with `routeKeys.developmentOnly=false`.
+1. **fast-sandbox controller route keys (Ed25519)** — the Secret named by `routeKeys.existingSecret`, or `fast-sandbox-route-keys` created from `routeKeys.privateKey` / `routeKeys.publicKey` (consumed by the controller as `FAST_SANDBOX_ROUTE_SIGNING_PRIVATE_KEY` / `FAST_SANDBOX_ROUTE_VERIFY_PUBLIC_KEY`). There are no default keys; see [Installing the Chart](#installing-the-chart).
 2. **OpenSandbox f1.* route-scope key ring (HMAC-SHA256)** — the server signs sandbox endpoint scopes with its `[ingress.secure_access]` key (`server.gateway.secureAccess` in charts/server) and the ingress gateway verifies them with the same symmetric ring (`--secure-access-keys`, `gateway.secureAccess` in charts/ingress-gateway). An operator must configure this ring on both charts with matching key material; the controller's Ed25519 public key must NOT be used here.
 
 ## Uninstalling the Chart

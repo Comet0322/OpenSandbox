@@ -45,7 +45,7 @@ helm-lint: ## Lint all Helm charts and verify dependencies
 	helm lint charts/server
 	helm lint charts/controller
 	helm lint charts/node-agent
-	helm lint charts/fast-sandbox
+	helm lint charts/fast-sandbox --set routeKeys.existingSecret=fast-sandbox-route-keys
 	helm dependency build charts/opensandbox
 	helm lint charts/opensandbox
 

@@ -37,8 +37,11 @@ helm install opensandbox opensandbox \
   --namespace opensandbox-system \
   --create-namespace \
   --set ingress-gateway.enabled=true \
-  --set fast-sandbox.enabled=true
+  --set fast-sandbox.enabled=true \
+  --set fast-sandbox.routeKeys.existingSecret=fast-sandbox-route-keys
 ```
+
+fast-sandbox ships no default route keys: create the `fast-sandbox-route-keys` Secret first (see the [fast-sandbox chart README](charts/fast-sandbox/README.md#installing-the-chart)).
 
 To announce the gateway from the server, also set `opensandbox-server.server.gateway.*` (see [Ingress Gateway](#ingress-gateway) below).
 
@@ -57,8 +60,10 @@ helm install opensandbox-controller manifests/charts/controller \
 
 # 3. Optional: fast-sandbox runtime — install BEFORE the ingress gateway and
 #    the server when the server will serve sandboxes through the fsb runtime
-#    (its [runtime] config points at the FastPath endpoint this chart creates)
-helm install fast-sandbox manifests/charts/fast-sandbox
+#    (its [runtime] config points at the FastPath endpoint this chart creates).
+#    Needs the fast-sandbox-route-keys Secret; there are no default keys.
+helm install fast-sandbox manifests/charts/fast-sandbox \
+  --set routeKeys.existingSecret=fast-sandbox-route-keys
 
 # 4. Ingress gateway — REQUIRED on Kubernetes deployments: sandbox Pods are
 #    ClusterIP-only and client traffic routes through the gateway. Install
@@ -531,19 +536,21 @@ Install `base` first, then this chart — and both **before the lifecycle server
 
 ```bash
 helm install base manifests/charts/base          # sandbox.fast.io CRDs + RBAC
-helm install fast-sandbox manifests/charts/fast-sandbox
+helm install fast-sandbox manifests/charts/fast-sandbox \
+  --set routeKeys.existingSecret=fast-sandbox-route-keys
 ```
 
 Or through the umbrella chart:
 
 ```bash
 helm install opensandbox manifests/charts/opensandbox \
-  --set fast-sandbox.enabled=true
+  --set fast-sandbox.enabled=true \
+  --set fast-sandbox.routeKeys.existingSecret=fast-sandbox-route-keys
 ```
 
 Two key systems apply (do not conflate them):
 
-- The fast-sandbox controller's Ed25519 route keys default to the published development-only test keys (`fast-sandbox.io/development-only: "true"` label). For production, set `routeKeys.existingSecret` or `routeKeys.privateKey` / `routeKeys.publicKey` with `routeKeys.developmentOnly=false`.
+- The fast-sandbox controller's Ed25519 route keys have no default: install fails until `routeKeys.existingSecret` (preferred) or `routeKeys.privateKey` / `routeKeys.publicKey` is set, and the published RFC 8032 test keypair is rejected. See the [fast-sandbox chart README](charts/fast-sandbox/README.md#installing-the-chart) for generating a keypair.
 - The OpenSandbox f1.* route-scope ring is HMAC-SHA256 and independent: the server signs with `[ingress.secure_access]` (`server.gateway.secureAccess` in charts/server) and the ingress gateway verifies with the same symmetric ring (`gateway.secureAccess` in charts/ingress-gateway). Configure both with matching key material for production.
 
 Point the OpenSandbox server's `[runtime]`/fsb configuration and the ingress gateway's `gateway.providerType=fast-sandbox` / `gateway.fastpathEndpoint` values at the deployed FastPath endpoint to serve sandboxes through this runtime (see [Ingress Gateway](#ingress-gateway) for the complete gateway install command, and `scripts/fast-sandbox-env` for a working reference).
@@ -556,7 +563,7 @@ Point the OpenSandbox server's `[runtime]`/fsb configuration and the ingress gat
 manifests/release/build-fast-sandbox.sh --no-build --sync-crds   # or: make -C manifests helm-gen-fast-sandbox-crds
 # 3. Rebuild the images and redeploy
 manifests/release/build-fast-sandbox.sh --load-kind <kind-cluster>
-helm upgrade fast-sandbox manifests/charts/fast-sandbox
+helm upgrade fast-sandbox manifests/charts/fast-sandbox --reuse-values
 ```
 
 ## Advanced Configuration
