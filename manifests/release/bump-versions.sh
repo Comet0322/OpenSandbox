@@ -181,47 +181,13 @@ else
   warn "helm-docs not found; chart README files may be stale and the CI helm-docs check will fail. Run 'make helm-docs' in manifests/ manually."
 fi
 
-# 6-10) SDK/CLI package versions, dependency ranges, and identity constants.
+# 9-10) SDK/CLI package versions, dependency ranges, and identity constants.
 # These only move at the stable bump: rc releases ship no SDK artifacts, so
 # the SDK tree stays at the last published line (dependency ranges keep
 # referencing published versions instead of an rc version that never ships).
 if [[ "$VERSION" == *-* ]]; then
   log "channel=rc: SDK/CLI package versions, dependency ranges, and identity constants untouched (they bump at the stable release)"
 else
-# 6) JS SDK package versions (top-level field)
-for f in sdks/sandbox/javascript/package.json sdks/code-interpreter/javascript/package.json; do
-  [[ -f "$f" ]] || { warn "missing ${f}; skipped"; continue; }
-  if [[ "$DRY_RUN" == true ]]; then
-    log "dry-run ${f}: $(sed -n 's/.*"version":[[:space:]]*"\([^"]*\)".*/\1/p' "$f" | head -1) -> ${VERSION}"
-    continue
-  fi
-  awk -v v="$VERSION" '
-    !done && /"version":/ { sub(/"version":[[:space:]]*"[^"]*"/, "\"version\": \"" v "\""); done = 1 }
-    { print }' "$f" > "${f}.tmp" && mv "${f}.tmp" "$f"
-done
-
-# 7) Kotlin/JVM project version
-f="sdks/sandbox/kotlin/gradle.properties"
-if [[ "$DRY_RUN" == true ]]; then
-  log "dry-run ${f}: $(sed -n 's/^project\.version=//p' "$f" | head -1) -> ${VERSION}"
-elif [[ -f "$f" ]]; then
-  sed -i.bak "s/^project\.version=.*/project.version=${VERSION}/" "$f" && rm -f "${f}.bak"
-fi
-
-# 8) .NET package versions + dependency range
-f="sdks/Directory.Build.props"
-if [[ -f "$f" ]]; then
-  if [[ "$DRY_RUN" == true ]]; then
-    log "dry-run ${f}: $(sed -n 's:.*<OpenSandboxPackageVersion>\(.*\)</OpenSandboxPackageVersion>.*:\1:p' "$f" | head -1) -> ${VERSION}"
-  else
-    sed -i.bak \
-      -e "s|<OpenSandboxPackageVersion>[^<]*</OpenSandboxPackageVersion>|<OpenSandboxPackageVersion>${VERSION}</OpenSandboxPackageVersion>|" \
-      -e "s|<OpenSandboxCodeInterpreterPackageVersion>[^<]*</OpenSandboxCodeInterpreterPackageVersion>|<OpenSandboxCodeInterpreterPackageVersion>${VERSION}</OpenSandboxCodeInterpreterPackageVersion>|" \
-      -e "s|<OpenSandboxDependencyVersionRange>[^<]*</OpenSandboxDependencyVersionRange>|<OpenSandboxDependencyVersionRange>[${VERSION},${NEXT_MAJOR}.0.0)</OpenSandboxDependencyVersionRange>|" \
-      "$f" && rm -f "${f}.bak"
-  fi
-fi
-
 # 9) Python inter-package dependency ranges (cli + sdks)
 for f in cli/pyproject.toml sdks/code-interpreter/python/pyproject.toml sdks/mcp/sandbox/python/pyproject.toml; do
   [[ -f "$f" ]] || continue
@@ -234,22 +200,13 @@ for f in cli/pyproject.toml sdks/code-interpreter/python/pyproject.toml sdks/mcp
   sed -i.bak -E "s|\"opensandbox>=[^\"]*\"|\"opensandbox>=${VERSION},<${NEXT_MAJOR}.0.0\"|g" "$f" && rm -f "${f}.bak"
 done
 
-# 10) SDK identity versions: default User-Agent strings + Go Version constant,
+# 10) SDK identity versions: default User-Agent strings,
 #    each together with the regression test that pins the exact value.
 # file|<product prefix> — any semver after the prefix is rewritten.
 UA_SPECS=(
   "sdks/sandbox/python/src/opensandbox/config/connection.py|OpenSandbox-Python-SDK"
   "sdks/sandbox/python/src/opensandbox/config/connection_sync.py|OpenSandbox-Python-SDK"
   "sdks/sandbox/python/tests/test_connection_config.py|OpenSandbox-Python-SDK"
-  "sdks/sandbox/javascript/src/core/constants.ts|OpenSandbox-JS-SDK"
-  "sdks/sandbox/javascript/tests/connection.test.mjs|OpenSandbox-JS-SDK"
-  "sdks/sandbox/kotlin/sandbox/src/main/kotlin/com/alibaba/opensandbox/sandbox/config/ConnectionConfig.kt|OpenSandbox-Kotlin-SDK"
-  "sdks/sandbox/kotlin/sandbox/src/test/kotlin/com/alibaba/opensandbox/sandbox/config/ConnectionConfigUserAgentTest.kt|OpenSandbox-Kotlin-SDK"
-  "sdks/sandbox/csharp/src/OpenSandbox/Core/Constants.cs|OpenSandbox-CSharp-SDK"
-  "sdks/sandbox/csharp/tests/OpenSandbox.Tests/ConstantsTests.cs|OpenSandbox-CSharp-SDK"
-  # file|<literal>"<semver>" pattern (Go Version constant + pinned test want)
-  "sdks/sandbox/go/constants.go|Version = "
-  "sdks/sandbox/go/constants_test.go|want = "
 )
 for spec in "${UA_SPECS[@]}"; do
   f="${spec%%|*}"

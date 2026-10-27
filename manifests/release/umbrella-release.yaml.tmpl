@@ -101,39 +101,6 @@ sdks:
   - product: mcp/sandbox
     language: python
     package: "pypi:opensandbox-mcp==${VERSION}"
-  - product: sandbox
-    language: javascript
-    package: "npm:@alibaba-group/opensandbox@${VERSION}"
-  - product: code-interpreter
-    language: javascript
-    package: "npm:@alibaba-group/opensandbox-code-interpreter@${VERSION}"
-  - product: sandbox
-    language: kotlin
-    package: "maven:com.alibaba.opensandbox:sandbox:${VERSION}"
-  - product: sandbox-api
-    language: kotlin
-    package: "maven:com.alibaba.opensandbox:sandbox-api:${VERSION}"
-  - product: sandbox-bom
-    language: kotlin
-    package: "maven:com.alibaba.opensandbox:sandbox-bom:${VERSION}"
-  - product: sandbox-pool-redis
-    language: kotlin
-    package: "maven:com.alibaba.opensandbox:sandbox-pool-redis:${VERSION}"
-  - product: code-interpreter
-    language: kotlin
-    package: "maven:com.alibaba.opensandbox:code-interpreter:${VERSION}"
-  - product: sandbox
-    language: csharp
-    package: "nuget:Alibaba.OpenSandbox ${VERSION}"
-  - product: code-interpreter
-    language: csharp
-    package: "nuget:Alibaba.OpenSandbox.CodeInterpreter ${VERSION}"
-  - product: sandbox
-    language: go
-    package: "go:github.com/alibaba/OpenSandbox/sdks/sandbox/go v${VERSION}"
-  - product: sandbox-pool-redis
-    language: go
-    package: "go:github.com/alibaba/OpenSandbox/sdks/sandbox/go/poolredis v${VERSION}"
 
 specs:
   - path: specs/sandbox-lifecycle.yml

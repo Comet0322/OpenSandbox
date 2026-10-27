@@ -23,27 +23,6 @@ const particles = Array.from({ length: 24 }, (_, index) => ({
 
 const sdks = [
   { name: "Python", command: "pip install opensandbox", link: "/sdks/python" },
-  {
-    name: "TypeScript",
-    command: "npm install @alibaba-group/opensandbox",
-    link: "/sdks/javascript",
-  },
-  {
-    name: "Java / Kotlin",
-    command:
-      'implementation("com.alibaba.opensandbox:sandbox:{latest_version}")',
-    link: "/sdks/kotlin",
-  },
-  {
-    name: "Go",
-    command: "go get github.com/alibaba/OpenSandbox/sdks/sandbox/go",
-    link: "/sdks/go",
-  },
-  {
-    name: "C# / .NET",
-    command: "dotnet add package Alibaba.OpenSandbox",
-    link: "/sdks/csharp",
-  },
 ];
 const currentSdk = computed(() => sdks[selectedSdk.value]);
 const preview = [

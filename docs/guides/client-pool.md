@@ -354,7 +354,7 @@ Each pool SDK exposes these operations (names follow language conventions):
 
 - `snapshot()` — pool phase, health, counters (idle size, in-flight warmups, consecutive failures, last error).
 - `snapshot_idle_entries()` — the current idle sandbox IDs with expiry timestamps.
-- `resize(max_idle)` — change the target buffer size at runtime. For business-hours sizing, see the [scheduled client pool example](/examples/client-pool-schedule), which calls `Resize` from an application-level controller.
+- `resize(max_idle)` — change the target buffer size at runtime.
 - `release_all_idle()` — drain the currently visible idle buffer and best-effort kill each entry, without stopping the pool. Useful to force a fresh set of warmups after a transient upstream problem. It does **not** change `max_idle`, does **not** fence other nodes, and does **not** stop an active leader from immediately replenishing — so it is not a safe way to swap creation templates on the same `pool_name`. For that case, retire the whole namespace under a new `pool_name` (see below).
 
 The existing cleanup methods retain their original execution behavior. For opt-in bounded parallel cleanup, use Python's `release_all_idle_parallel(max_workers=50)`, Kotlin's `releaseAllIdle(concurrency)`, JavaScript's `releaseAllIdle(concurrency)`, or Go's concrete `(*DefaultSandboxPool).ReleaseAllIdleParallel(ctx, maxWorkers)`. These methods validate a positive concurrency value and wait for every drained ID to receive a best-effort kill attempt. The Go method is intentionally outside the `SandboxPool` interface to preserve compatibility with third-party implementors.
@@ -408,6 +408,3 @@ One deliberate exception: if the state store itself is unreachable, the destroy 
 ## Further reading
 
 - Python: [`/sdks/python`](/sdks/python) &mdash; `SandboxPoolSync`, `SandboxPoolAsync`, Redis store.
-- JavaScript: [SDK entry point](/sdks/javascript) — `SandboxPool` and the `/pool-redis` export.
-- Kotlin: [`/sdks/kotlin`](/sdks/kotlin) &mdash; `SandboxPool` builder, `sandbox-pool-redis` module.
-- Go: [`/sdks/go`](/sdks/go) &mdash; `SandboxPool` interface, `RedisPoolStateStore`, distributed deployment notes.

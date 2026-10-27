@@ -21,10 +21,6 @@ const sdkSidebar = [
     items: [
       { text: "Overview", link: "/sdks/" },
       { text: "Python", link: "/sdks/python" },
-      { text: "JavaScript", link: "/sdks/javascript" },
-      { text: "Kotlin / Java", link: "/sdks/kotlin" },
-      { text: "Go", link: "/sdks/go" },
-      { text: "C#", link: "/sdks/csharp" },
     ],
   },
   {
@@ -312,7 +308,6 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: "Code Interpreter", link: "/examples/code-interpreter" },
-            { text: "Scheduled Client Pool", link: "/examples/client-pool-schedule" },
             { text: "AIO Sandbox", link: "/examples/aio-sandbox" },
             { text: "Agent Sandbox", link: "/examples/agent-sandbox" },
             { text: "Windows", link: "/examples/windows" },

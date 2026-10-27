@@ -125,64 +125,11 @@ See the [full example catalog](docs/examples/index.md) for more coding agents, f
 
 ## SDKs
 
-Pick your language:
-
 <details>
 <summary><b>Python</b></summary>
 
 ```bash
 pip install opensandbox
-```
-
-</details>
-
-<details>
-<summary><b>Java/Kotlin (Gradle Kotlin DSL)</b></summary>
-
-```kotlin
-dependencies {
-    implementation("com.alibaba.opensandbox:sandbox:{latest_version}")
-}
-```
-
-</details>
-
-<details>
-<summary><b>Java/Kotlin (Maven)</b></summary>
-
-```xml
-<dependency>
-    <groupId>com.alibaba.opensandbox</groupId>
-    <artifactId>sandbox</artifactId>
-    <version>{latest_version}</version>
-</dependency>
-```
-
-</details>
-
-<details>
-<summary><b>JavaScript/TypeScript</b></summary>
-
-```bash
-npm install @alibaba-group/opensandbox
-```
-
-</details>
-
-<details>
-<summary><b>C#/.NET</b></summary>
-
-```bash
-dotnet add package Alibaba.OpenSandbox
-```
-
-</details>
-
-<details>
-<summary><b>Go</b></summary>
-
-```bash
-go get github.com/alibaba/OpenSandbox/sdks/sandbox/go
 ```
 
 </details>

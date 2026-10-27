@@ -5,34 +5,30 @@ description: Choose an OpenSandbox SDK and compare lifecycle, Client Pool, traci
 
 # SDKs
 
-OpenSandbox provides five sandbox SDKs for lifecycle management, command execution, file operations, and resource metrics. This site follows the repository's default branch; a feature merged here may require a newer package than the one you have installed. Check the [release index](https://github.com/opensandbox-group/OpenSandbox/releases) when upgrading.
+OpenSandbox provides a Python sandbox SDK for lifecycle management, command execution, file operations, and resource metrics. This site follows the repository's default branch; a feature merged here may require a newer package than the one you have installed. Check the [release index](https://github.com/opensandbox-group/OpenSandbox/releases) when upgrading.
 
 ## Installation
 
 | Language | Package | Install |
 | --- | --- | --- |
 | [Python](/sdks/python) | `opensandbox` | `pip install opensandbox` |
-| [JavaScript/TypeScript](/sdks/javascript) | `@alibaba-group/opensandbox` | `npm install @alibaba-group/opensandbox` |
-| [Kotlin/Java](/sdks/kotlin) | `com.alibaba.opensandbox:sandbox` | Gradle/Maven |
-| [Go](/sdks/go) | `github.com/alibaba/OpenSandbox/sdks/sandbox/go` | `go get github.com/alibaba/OpenSandbox/sdks/sandbox/go` |
-| [C#/.NET](/sdks/csharp) | `Alibaba.OpenSandbox` | `dotnet add package Alibaba.OpenSandbox` |
 
 ## Capability coverage
 
 “Yes” means a public SDK entry point exists. Availability also depends on the server runtime and the execd version installed in the sandbox.
 
-| Capability | Python async/sync | JavaScript/TypeScript | Kotlin/Java | Go | C#/.NET |
-| --- | --- | --- | --- | --- | --- |
-| Create, connect, renew, pause/resume, kill | Yes | Yes | Yes | Yes | Yes |
-| Snapshots and template management | Yes | Yes | Yes | Yes | Yes |
-| Resource requests, volumes, lifecycle hooks | Yes | Yes | Yes | Yes | Yes |
-| Commands, files, resource metrics | Yes | Yes | Yes | Yes | Yes |
-| Egress policy and Credential Vault | Yes | Yes | Yes | Yes | Yes |
-| Isolated sessions | Yes | Yes | Yes | Yes | Yes |
-| [Client Pool](/guides/client-pool), including Redis | Yes | Yes | Yes | Yes | No |
-| [Pool warmup tracing](/sdks/observability#pool-warmup-tracing) | Yes | Yes, fewer attributes | Yes | No | No |
-| [Diagnostic context, logs/events](/api/#diagnostics) | Yes | Yes | Yes | Yes | Yes |
-| [Create-latency telemetry](/sdks/observability#creation-metrics) | Yes | Yes | Yes | Yes | Yes |
+| Capability | Python async/sync |
+| --- | --- |
+| Create, connect, renew, pause/resume, kill | Yes |
+| Snapshots and template management | Yes |
+| Resource requests, volumes, lifecycle hooks | Yes |
+| Commands, files, resource metrics | Yes |
+| Egress policy and Credential Vault | Yes |
+| Isolated sessions | Yes |
+| [Client Pool](/guides/client-pool), including Redis | Yes |
+| [Pool warmup tracing](/sdks/observability#pool-warmup-tracing) | Yes |
+| [Diagnostic context, logs/events](/api/#diagnostics) | Yes |
+| [Create-latency telemetry](/sdks/observability#creation-metrics) | Yes |
 
 ### Differences that affect application code
 

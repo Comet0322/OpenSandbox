@@ -18,9 +18,6 @@
 #
 # One version, one commit, one tag family for the whole platform:
 #   git tag                     release-X.Y.Z        (annotated, on the BOM commit)
-#   Go companion tag (same commit):
-#                               sdks/sandbox/go/vX.Y.Z
-#   (poolredis merges into the parent module pre-GA: issue #1900)
 #   image tags (pushed by CI)   opensandbox/<comp>:release-X.Y.Z
 #   packages / chart / CLI      X.Y.Z
 #
@@ -204,7 +201,6 @@ if [[ "$MAJOR" == "1" && "$MINOR" == "0" ]]; then
 fi
 
 UMBRELLA_TAG="release-${VERSION}"
-GO_TAG_MAIN="sdks/sandbox/go/v${VERSION}"
 
 require_cmd git
 if [[ "$CREATE_RELEASE" == true ]]; then
@@ -323,43 +319,10 @@ if [[ "$SKIP_CONSISTENCY" != true ]]; then
     scan_ok "chart split-field image tags are empty or release-${VERSION}"
   fi
 
-  # JS SDKs, Kotlin/JVM, .NET, Python ranges: SDK package carriers only move
+  # Python ranges: SDK package carriers only move
   # at a stable release — rc ships no SDK artifacts, so their versions stay
   # at the last published line and are not checked here.
   if [[ "$CHANNEL" == "stable" ]]; then
-  # JS SDKs
-  for pkg in sdks/sandbox/javascript sdks/code-interpreter/javascript; do
-    f="${pkg}/package.json"
-    if [[ -f "$f" ]]; then
-      ver="$(sed -n 's/.*"version":[[:space:]]*"\([^"]*\)".*/\1/p' "$f" | head -1)"
-      if [[ "$ver" == "$VERSION" ]]; then scan_ok "${f} version=${ver}"
-      else scan_fail "${f} version='${ver}' != ${VERSION}"; fi
-    else scan_fail "missing ${f}"; fi
-  done
-
-  # Kotlin/JVM multi-project
-  f="sdks/sandbox/kotlin/gradle.properties"
-  ver="$(sed -n 's/^project\.version=//p' "$f" | head -1)"
-  if [[ "$ver" == "$VERSION" ]]; then scan_ok "${f} project.version=${ver}"
-  else scan_fail "${f} project.version='${ver}' != ${VERSION}"; fi
-
-  # .NET
-  f="sdks/Directory.Build.props"
-  if [[ -f "$f" ]]; then
-    ver="$(sed -n 's:.*<OpenSandboxPackageVersion>\(.*\)</OpenSandboxPackageVersion>.*:\1:p' "$f" | head -1)"
-    if [[ "$ver" == "$VERSION" ]]; then scan_ok "${f} OpenSandboxPackageVersion=${ver}"
-    else scan_fail "${f} OpenSandboxPackageVersion='${ver}' != ${VERSION}"; fi
-    ver_ci="$(sed -n 's:.*<OpenSandboxCodeInterpreterPackageVersion>\(.*\)</OpenSandboxCodeInterpreterPackageVersion>.*:\1:p' "$f" | head -1)"
-    if [[ "$ver_ci" == "$VERSION" ]]; then scan_ok "${f} OpenSandboxCodeInterpreterPackageVersion=${ver_ci}"
-    else scan_fail "${f} OpenSandboxCodeInterpreterPackageVersion='${ver_ci}' != ${VERSION}"; fi
-    want_range="[${VERSION},${NEXT_MAJOR}.0.0)"
-    range="$(sed -n 's:.*<OpenSandboxDependencyVersionRange>\(.*\)</OpenSandboxDependencyVersionRange>.*:\1:p' "$f" | head -1)"
-    if [[ "$range" == "$want_range" ]]; then scan_ok "${f} dependency range=${range}"
-    else scan_fail "${f} dependency range='${range}' != ${want_range}"; fi
-  else
-    scan_fail "missing ${f}"
-  fi
-
   # Python inter-package ranges (cli + sdks)
   for f in cli/pyproject.toml sdks/code-interpreter/python/pyproject.toml sdks/mcp/sandbox/python/pyproject.toml; do
     if [[ -f "$f" ]]; then
@@ -495,7 +458,7 @@ log "Release branch   : ${RELEASE_BRANCH}"
 log "Build commit     : ${C_BUILD}"
 log "Previous tag     : ${PREVIOUS_TAG:-<none> (first umbrella)}"
 log "Release notes    : ${NOTES_FILE} (hand-authored, must be pre-committed)"
-log "Tags to mint     : ${UMBRELLA_TAG}, ${GO_TAG_MAIN} (on the BOM commit)"
+log "Tags to mint     : ${UMBRELLA_TAG} (on the BOM commit)"
 log "BOM + notes      : ${BOM_FILE}, ${NOTES_FILE}"
 
 if [[ "$DRY_RUN" == true ]]; then
@@ -550,13 +513,12 @@ if [[ "$NO_TAGS" == true ]]; then
 fi
 if [[ "$NO_TAGS" != true ]]; then
   mint_tag "$UMBRELLA_TAG"
-  mint_tag "$GO_TAG_MAIN"
 fi
 
 if [[ "$PUSH" == true ]]; then
   git push origin "$RELEASE_BRANCH"
   if [[ "$NO_TAGS" != true ]]; then
-    git push origin "$UMBRELLA_TAG" "$GO_TAG_MAIN"
+    git push origin "$UMBRELLA_TAG"
   fi
   log "Pushed ${RELEASE_BRANCH}${NO_TAGS:+ (branch only, tags skipped)}."
 else

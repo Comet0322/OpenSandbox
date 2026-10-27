@@ -38,21 +38,7 @@ curl http://127.0.0.1:8080/health
 pip install opensandbox
 ```
 
-```bash [JavaScript]
-npm install @alibaba-group/opensandbox
-```
-
-```bash [Go]
-go get github.com/alibaba/OpenSandbox/sdks/sandbox/go
-```
-
-```bash [C#]
-dotnet add package Alibaba.OpenSandbox
-```
-
 :::
-
-For Kotlin/Java, see [Installation](/getting-started/installation).
 
 ## 3. Create and Use a Sandbox
 

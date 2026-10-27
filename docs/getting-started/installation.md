@@ -40,38 +40,11 @@ The core SDKs for sandbox lifecycle management, command execution, and file oper
 pip install opensandbox
 ```
 
-```bash [JavaScript/TypeScript]
-npm install @alibaba-group/opensandbox
-```
-
-```kotlin [Kotlin/Java (Gradle)]
-dependencies {
-    implementation(platform("com.alibaba.opensandbox:sandbox-bom:{latest_version}"))
-    implementation("com.alibaba.opensandbox:sandbox")
-}
-```
-
-```xml [Kotlin/Java (Maven)]
-<dependency>
-    <groupId>com.alibaba.opensandbox</groupId>
-    <artifactId>sandbox</artifactId>
-    <version>{latest_version}</version>
-</dependency>
-```
-
-```bash [Go]
-go get github.com/alibaba/OpenSandbox/sdks/sandbox/go
-```
-
-```bash [C#/.NET]
-dotnet add package Alibaba.OpenSandbox
-```
-
 :::
 
 For detailed SDK usage, see the [SDK documentation](/sdks/).
 
-Choose a published SDK version for your application. Replace `{latest_version}` in the JVM examples with that version; use the BOM when combining JVM modules such as `sandbox` and `sandbox-pool-redis`. See the [release index](https://github.com/opensandbox-group/OpenSandbox/releases).
+Choose a published SDK version for your application. See the [release index](https://github.com/opensandbox-group/OpenSandbox/releases).
 
 Feature availability differs by language. See the [capability matrix](/sdks/#capability-coverage), [Client Pool](/guides/client-pool), and [SDK Tracing](/sdks/observability#pool-warmup-tracing).
 
